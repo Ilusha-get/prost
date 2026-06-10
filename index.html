@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Brawl Casino | Мега Ящики + Анимация карт | Flappy Bertch</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 30%, #1b4d1a, #0a2f0a);
+            font-family: 'Montserrat', 'Inter', sans-serif;
+            color: #FFE8C5;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        .grass-pattern {
+            background-image: repeating-linear-gradient(45deg, rgba(50, 205, 50, 0.2) 0px, rgba(50, 205, 50, 0.2) 2px, transparent 2px, transparent 8px);
+        }
+
+        .field-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.2;
+        }
+
+        .field-lines::before {
+            content: "";
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="none" stroke="%23ffffff" stroke-width="0.8" stroke-dasharray="4 6"/><circle cx="50" cy="50" r="18" fill="none" stroke="white" stroke-width="0.6"/><line x1="10" y1="50" x2="90" y2="50" stroke="white" stroke-width="0.8"/></svg>');
+            background-repeat: repeat;
+            background-size: 45px;
+            transform: rotate(5deg);
+            animation: drift 60s linear infinite;
+        }
+
+        @keyframes drift {
+            0% { transform: rotate(0deg) translate(0,0);}
+            100% { transform: rotate(360deg) translate(10%,10%);}
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            border-radius: 48px;
+            padding: 20px 30px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            border: 2px solid #f0c45a;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        .gazan-avatar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #2c2f24;
+            padding: 8px 20px;
+            border-radius: 100px;
+            border-left: 8px solid #ffcf40;
+        }
+
+        .gazan-avatar div i {
+            font-size: 55px;
+            color: #ffe0a3;
+        }
+
+        .gazan-avatar span {
+            font-weight: 800;
+            font-size: 1.4rem;
+            color: #FFE484;
+        }
+
+        .balance-card {
+            background: #11190e;
+            padding: 8px 25px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 1.8rem;
+            box-shadow: 0 5px 0 #2b6d1a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .balance-card i {
+            color: gold;
+            font-size: 2rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin: 40px 0 20px;
+            background: linear-gradient(135deg, #FFE484, #f9a825);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            border-left: 8px solid #f5bc42;
+            padding-left: 20px;
+        }
+
+        .boxes-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .box-card {
+            background: linear-gradient(145deg, #2e4a23, #1e3517);
+            border-radius: 36px;
+            padding: 25px 20px;
+            width: 280px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 1px solid #eabd5e;
+            box-shadow: 0 20px 30px -12px black;
+        }
+
+        .box-card:hover {
+            transform: translateY(-10px);
+            background: #3a602c;
+        }
+
+        .box-icon {
+            font-size: 5rem;
+        }
+
+        .box-name {
+            font-weight: 800;
+            font-size: 1.8rem;
+        }
+
+        .price {
+            background: #ffcf40;
+            color: #1b3b0e;
+            padding: 6px 12px;
+            border-radius: 40px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        button {
+            background: #f5bc42;
+            border: none;
+            font-weight: 800;
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-family: inherit;
+            color: #1c3d0e;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #7a4c10;
+            transition: 0.05s linear;
+        }
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #7a4c10;
+        }
+
+        .roulette-panel {
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(12px);
+            border-radius: 60px;
+            padding: 30px;
+            margin: 40px 0;
+            border: 2px solid #e7b42c;
+        }
+        .wheel {
+            background: radial-gradient(circle at 30% 30%, #ffd966, #bf8f2c);
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            cursor: pointer;
+            box-shadow: 0 0 0 8px #1c2b10;
+        }
+        .spin-result {
+            font-size: 1.6rem;
+            font-weight: bold;
+            background: #000000aa;
+            padding: 10px;
+            border-radius: 60px;
+            width: fit-content;
+            margin: 15px auto;
+        }
+        .flappy-section {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            border-radius: 48px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 2px solid #ffcf40;
+        }
+        canvas {
+            border-radius: 28px;
+            box-shadow: 0 20px 30px black;
+            background-color: #1a4d2a;
+            width: 100%;
+            max-width: 700px;
+            aspect-ratio: 700/450;
+            display: block;
+            margin: 0 auto;
+            cursor: pointer;
+        }
+        .shop-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .coin-pack {
+            background: #2c4820d9;
+            padding: 20px;
+            border-radius: 48px;
+            width: 200px;
+            text-align: center;
+            backdrop-filter: blur(4px);
+            border: 1px solid #f3c550;
+        }
+        .free-deposit {
+            background: #ffb347;
+            color: #2b4d0b;
+            border-radius: 80px;
+            padding: 20px;
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .toast-notify {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2c13e6;
+            backdrop-filter: blur(10px);
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-weight: bold;
+            color: #ffdd88;
+            z-index: 999;
+            border-left: 6px solid gold;
+            animation: fadeUp 2s forwards;
+            pointer-events: none;
+        }
+        @keyframes fadeUp {
+            0% { opacity: 0; bottom: 0; }
+            10% { opacity: 1; bottom: 30px; }
+            90% { opacity: 1; bottom: 30px; }
+            100% { opacity: 0; bottom: 80px; visibility: hidden; }
+        }
+        .support-badge {
+            background: #223311dd;
+            border-radius: 30px;
+            padding: 12px 18px;
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.8rem;
+        }
+        footer {
+            text-align: center;
+            padding: 30px;
+            font-size: 0.8rem;
+        }
+        /* Анимация для открытия кейса (карты) */
+        .card-spin-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            animation: fadeIn 0.2s;
+        }
+        .card-spinner {
+            width: 320px;
+            height: 400px;
+            background: #1f2d18;
+            border-radius: 48px;
+            border: 4px solid gold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 40px #ffd700;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-slot {
+            font-size: 5rem;
+            margin: 20px;
+            transition: 0.1s;
+            animation: bounceCard 0.3s infinite alternate;
+        }
+        .reward-text {
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+        }
+        @keyframes bounceCard {
+            0% { transform: scale(1);}
+            100% { transform: scale(1.2); text-shadow: 0 0 10px gold;}
+        }
+        @keyframes fadeIn {
+            from { opacity: 0;}
+            to { opacity: 1;}
+        }
+        @media (max-width:700px){
+            .hero { flex-direction: column; text-align:center;}
+        }
+    </style>
+</head>
+<body class="grass-pattern">
+<div class="field-lines"></div>
+<div class="container">
+    <div class="hero">
+        <div class="gazan-avatar">
+            <div><i class="fas fa-futbol"></i></div>
+            <span>⚡ГАЗАН⚡<br><small>Легенда футбола и ящиков</small></span>
+        </div>
+        <div class="balance-card">
+            <i class="fas fa-coins"></i>
+            <span id="balanceAmount">1000</span> <span> монет</span>
+        </div>
+        <div><i class="fas fa-headset"></i> Работаем 24/7 | Поддержки нет</div>
+    </div>
+
+    <h2 class="section-title"><i class="fas fa-box-open"></i> МЕГА ЯЩИКИ & ПЕРСОНАЖИ (КРУТИ КАРТЫ!)</h2>
+    <div class="boxes-grid" id="boxesGrid"></div>
+
+    <div class="roulette-panel">
+        <h2 style="text-align:center;"><i class="fas fa-dice-d20"></i> ФУТБОЛЬНАЯ РУЛЕТКА (можно уйти в минус)</h2>
+        <div class="wheel-container" style="text-align:center">
+            <div class="wheel" id="spinWheel"><i class="fas fa-futbol"></i></div>
+            <button id="spinBtn"><i class="fas fa-sync-alt"></i> КРУТИТЬ БЕСПЛАТНО!</button>
+            <div class="spin-result" id="spinResultText">Нажми Крутить!</div>
+            <div class="debt-alert" id="debtWarning" style="font-weight:bold; color:#ffaa66;"></div>
+        </div>
+    </div>
+
+    <div class="flappy-section">
+        <h2 style="text-align:center;"><i class="fas fa-gamepad"></i> ⚽ FLAPPY BERTCH - ФУТБОЛЬНЫЙ ПОЛЁТ ⚽</h2>
+        <div class="game-container">
+            <canvas id="flappyCanvas" width="700" height="450" style="width:100%; max-width:700px; aspect-ratio:700/450"></canvas>
+        </div>
+        <div class="game-controls" style="display:flex; justify-content:center; gap:20px; margin-top:15px;">
+            <button id="startFlappyBtn"><i class="fas fa-play"></i> НАЧАТЬ ИГРУ (ПРОБЕЛ/КЛИК)</button>
+            <div class="coin-reward" style="background:#ffd966; padding:8px 18px; border-radius:40px;"><i class="fas fa-trophy"></i> Счёт: <span id="flappyScore">0</span> | Награда за 10 очков: +100 монет</div>
+        </div>
+    </div>
+
+    <h2 class="section-title"><i class="fas fa-store"></i> ПОПОЛНИТЬ МОНЕТЫ 💰</h2>
+    <div class="shop-section" id="shopSection"></div>
+
+    <div class="free-deposit" id="freeDepositBtn">
+        <span><i class="fas fa-gift"></i> 🎁 БЕСПЛАТНЫЙ ДЕПОЗИТ 150 МОНЕТ 🎁</span>
+        <button id="claimFreeBtn">ЗАБРАТЬ БОНУС</button>
+    </div>
+
+    <div class="support-badge">
+        <span>⚠️ В рулетке возможен долг! Играй в Flappy Bertch, зарабатывай монеты и открывай ящики с бойцами.</span>
+        <span>⚡ 24/7, поддержки нет, но ГАЗАН всегда с тобой ⚡</span>
+    </div>
+    <footer><i class="fas fa-copyright"></i> Brawl Casino - Футбольный флаппи, рулетка, мегаящики. Brawl Stars фанатский проект.</footer>
+</div>
+
+<script>
+    // ========== ВАЛЮТА (долг разрешен) ==========
+    let playerBalance = 1000;
+    const balanceSpan = document.getElementById('balanceAmount');
+    const debtWarningSpan = document.getElementById('debtWarning');
+    function updateBalanceUI() {
+        balanceSpan.innerText = playerBalance;
+        if (playerBalance < 0) {
+            debtWarningSpan.innerHTML = `⚠️ ВЫ ДОЛЖНЫ КАЗИНО ${Math.abs(playerBalance)} МОНЕТ! Пополните баланс! ⚠️`;
+        } else {
+            debtWarningSpan.innerHTML = `💰 Баланс: ${playerBalance} монет. Крути рулетку или играй в Flappy!`;
+        }
+    }
+    function modifyBalance(amount, reason = "") {
+        playerBalance += amount;
+        updateBalanceUI();
+        if(reason) showToast(reason);
+        if(playerBalance < 0) showToast(`Долг: ${Math.abs(playerBalance)} монет! Восполни через магазин!`);
+        return playerBalance;
+    }
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-notify';
+        toast.innerHTML = `<i class="fas fa-star-of-life"></i> ${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2200);
+    }
+
+    // ========== АНИМАЦИЯ ОТКРЫТИЯ КЕЙСА С КАРТАМИ ==========
+    function showCardSpinAnimation(rewardCoins, brawlerName, boxName) {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'card-spin-overlay';
+            let spinCount = 0;
+            const cardsArray = ["🃏", "🎴", "🃟", "⭐", "⚽", "🔥", "💎", "🐣"];
+            overlay.innerHTML = `
+                <div class="card-spinner">
+                    <div class="card-slot" id="spinningCard">${cardsArray[0]}</div>
+                    <div class="reward-text" id="spinRewardText">Крутим карты...</div>
+                    <button id="closeSpinBtn" style="margin-top:20px; background:#ffbb44;">ЗАБРАТЬ НАГРАДУ</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            const cardSlot = document.getElementById('spinningCard');
+            const rewardTextSpan = document.getElementById('spinRewardText');
+            const interval = setInterval(() => {
+                spinCount++;
+                const randomCard = cardsArray[Math.floor(Math.random() * cardsArray.length)];
+                if(cardSlot) cardSlot.innerHTML = randomCard;
+            }, 80);
+            setTimeout(() => {
+                clearInterval(interval);
+                if(cardSlot) {
+                    let finalSymbol = brawlerName ? "🌟" : "💰";
+                    cardSlot.innerHTML = finalSymbol;
+                    if(brawlerName) {
+                        rewardTextSpan.innerHTML = `✨ ПОЗДРАВЛЯЕМ! ✨<br>ВЫПАЛ ПЕРСОНАЖ: ${brawlerName}<br>+${rewardCoins} МОНЕТ!`;
+                    } else {
+                        rewardTextSpan.innerHTML = `🎲 ВЫПАЛИ МОНЕТЫ!<br>+${rewardCoins} МОНЕТ!`;
+                    }
+                }
+                document.getElementById('closeSpinBtn')?.addEventListener('click', () => {
+                    overlay.remove();
+                    resolve();
+                });
+            }, 1800);
+        });
+    }
+
+    // ========== ЯЩИКИ / КЕЙСЫ (с вращением карт) ==========
+    const brawlersList = ["Спайк", "Леон", "Кроу", "Мег", "Эдгар", "Базз", "Джесси", "Мистер П", "Сердж", "Фанг", "Бо", "Колетт", "Газан (легенда)"];
+    const megaBrawlers = ["Легендарный Спайк", "Мифический Кроу", "Хромный Сту", "ГАЗАН (футбольный боец)", "⭐ ТРОФЕЙНЫЙ МЕГА БОЕЦ"];
+    function getRandomBrawler(isMega) {
+        let pool = isMega ? megaBrawlers : brawlersList;
+        return pool[Math.floor(Math.random() * pool.length)];
+    }
+    const boxes = [
+        { id: "small", name: "Обычный ящик", icon: "fas fa-cube", price: 50, rewards: [40,70,100], chance: 0.35, isMega: false },
+        { id: "big", name: "Большой ящик", icon: "fas fa-cubes", price: 150, rewards: [120,180,260], chance: 0.6, isMega: false },
+        { id: "mega", name: "МЕГА ЯЩИК", icon: "fas fa-gem", price: 400, rewards: [280,480,800], chance: 0.88, isMega: true }
+    ];
+
+    async function openBoxWithAnimation(box) {
+        if(playerBalance < box.price) {
+            showToast(`❌ Не хватает ${box.price} монет! Заработай в рулетке!`);
+            return false;
+        }
+        modifyBalance(-box.price, `Открытие ${box.name} (-${box.price}🪙)`);
+        let rewardCoins = box.rewards[Math.floor(Math.random() * box.rewards.length)];
+        let brawlerGain = null;
+        let isBrawler = Math.random() < box.chance;
+        if(isBrawler) {
+            brawlerGain = getRandomBrawler(box.isMega);
+            if(box.isMega) rewardCoins += 120;
+        } else {
+            rewardCoins += 25;
+        }
+        // Показываем анимацию карт
+        await showCardSpinAnimation(rewardCoins, brawlerGain, box.name);
+        modifyBalance(rewardCoins, `🎁 ${box.name}: +${rewardCoins}🪙 ${brawlerGain ? "✨ПЕРСОНАЖ: "+brawlerGain+"✨" : ""}`);
+        if(brawlerGain) showToast(`🌟🌟 НОВЫЙ БОЕЦ! ${brawlerGain} в коллекции! 🌟🌟`);
+        else showToast(`📦 Открыт ${box.name} ➕ ${rewardCoins} монет`);
+        return true;
+    }
+
+    function renderBoxes() {
+        const container = document.getElementById('boxesGrid');
+        container.innerHTML = '';
+        boxes.forEach(b => {
+            const card = document.createElement('div');
+            card.className = 'box-card';
+            card.innerHTML = `<div class="box-icon"><i class="${b.icon}"></i></div><div class="box-name">${b.name}</div><div class="price">${b.price} 🪙</div><button class="openBoxBtn" data-id="${b.id}">ОТКРЫТЬ КЕЙС</button><div style="font-size:0.7rem;">🎲 шанс бойца: ${Math.round(b.chance*100)}%</div>`;
+            container.appendChild(card);
+        });
+        document.querySelectorAll('.openBoxBtn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = btn.getAttribute('data-id');
+                const b = boxes.find(bx => bx.id === id);
+                if(b) await openBoxWithAnimation(b);
+            });
+        });
+    }
+    renderBoxes();
+
+    // ========== РУЛЕТКА (долговая) ==========
+    let spinning = false;
+    const spinBtn = document.getElementById('spinBtn');
+    const resultSpan = document.getElementById('spinResultText');
+    const wheelDiv = document.getElementById('spinWheel');
+    function spinRoulette() {
+        if(spinning) return;
+        spinning = true;
+        spinBtn.disabled = true;
+        let spins = 0;
+        const interval = setInterval(() => { wheelDiv.style.transform = `rotate(${spins*30}deg)`; spins++; if(spins>12) clearInterval(interval); }, 40);
+        setTimeout(() => {
+            let outcome = 0;
+            const r = Math.random();
+            if(r<0.35) outcome = Math.floor(Math.random() * 300) + 60;
+            else if(r<0.65) outcome = - (Math.floor(Math.random() * 120) + 20);
+            else outcome = - (Math.floor(Math.random() * 550) + 150);
+            modifyBalance(outcome, `Рулетка: ${outcome>=0 ? '+' : ''}${outcome} монет`);
+            resultSpan.innerHTML = outcome >= 0 ? `🎉 ВЫИГРЫШ: +${outcome} 🎉` : `💀 ПРОИГРЫШ: ${outcome} монет 💀`;
+            if(playerBalance<0) resultSpan.innerHTML += ` (Долг: ${Math.abs(playerBalance)})`;
+            wheelDiv.style.transform = "";
+            spinning = false;
+            spinBtn.disabled = false;
+        }, 350);
+    }
+    spinBtn.addEventListener('click', spinRoulette);
+
+    // ========== FLAPPY BERTCH ==========
+    const canvas = document.getElementById('flappyCanvas');
+    const ctx = canvas.getContext('2d');
+    let gameRunning = false;
+    let score = 0;
+    let bird = { x: 100, y: canvas.height/2, radius: 14, velocity: 0, gravity: 0.2, jumpPower: -4.2 };
+    let pipes = [];
+    let frameId = null;
+    let flappyScoreSpan = document.getElementById('flappyScore');
+    let lastRewardScore = 0;
+    function initGame() {
+        score = 0;
+        flappyScoreSpan.innerText = "0";
+        bird.y = canvas.height/2;
+        bird.velocity = 0;
+        pipes = [];
+        generatePipe();
+        generatePipe();
+        lastRewardScore = 0;
+    }
+    function generatePipe() {
+        const gap = 145;
+        const minHeight = 55;
+        const maxTop = canvas.height - gap - minHeight;
+        const topHeight = Math.floor(Math.random() * (maxTop - minHeight + 1) + minHeight);
+        pipes.push({ x: canvas.width, top: topHeight, bottom: topHeight + gap, width: 50, counted: false });
+    }
+    function updateGame() {
+        if(!gameRunning) return;
+        bird.velocity += bird.gravity;
+        bird.y += bird.velocity;
+        if(bird.y + bird.radius <= 0) { bird.y = bird.radius; bird.velocity = 0; }
+        if(bird.y + bird.radius >= canvas.height) { endGame(); return; }
+        for(let i=0; i<pipes.length; i++) {
+            const p = pipes[i];
+            p.x -= 2.2;
+            if(bird.x + bird.radius > p.x && bird.x - bird.radius < p.x + p.width) {
+                if(bird.y - bird.radius < p.top || bird.y + bird.radius > p.bottom) { endGame(); return; }
+            }
+            if(!p.counted && p.x + p.width < bird.x) {
+                p.counted = true;
+                score++;
+                flappyScoreSpan.innerText = score;
+                if(Math.floor(score/10) > lastRewardScore) {
+                    let reward = 100;
+                    modifyBalance(reward, `⚽ FLAPPY BERTCH: +${reward} монет за ${score} очков! ⚽`);
+                    lastRewardScore = Math.floor(score/10);
+                    showToast(`+${reward} монет! Лети выше!`);
+                }
+            }
+        }
+        pipes = pipes.filter(p => p.x + p.width > 0);
+        if(pipes.length < 2 || (pipes[pipes.length-1].x < canvas.width - 250)) generatePipe();
+    }
+    function draw() {
+        if(!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#2b7a2b";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "#65b83a";
+        for(let i=0;i<20;i++) ctx.fillRect(0, canvas.height-15 + (i%2)*5, canvas.width, 5);
+        pipes.forEach(p => {
+            ctx.fillStyle = "#d48a3b";
+            ctx.fillRect(p.x, 0, p.width, p.top);
+            ctx.fillRect(p.x, p.bottom, p.width, canvas.height-p.bottom);
+            ctx.fillStyle = "#f5bc42";
+            ctx.fillRect(p.x+5, p.top-15, p.width-10, 20);
+            ctx.fillRect(p.x+5, p.bottom-5, p.width-10, 20);
+        });
+        ctx.beginPath();
+        ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI*2);
+        ctx.fillStyle = "#fff6d0";
+        ctx.fill();
+        ctx.fillStyle = "#4a2e1a";
+        ctx.beginPath();
+        ctx.moveTo(bird.x-8, bird.y-5); ctx.lineTo(bird.x+8, bird.y-5); ctx.lineTo(bird.x, bird.y+8); ctx.fill();
+        ctx.fillStyle = "#000";
+        ctx.beginPath(); ctx.arc(bird.x-5, bird.y-3, 2,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(bird.x+5, bird.y-3, 2,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle="#ffcc44";
+        ctx.font="bold 20px Montserrat";
+        ctx.fillText("⚽", bird.x-12, bird.y-7);
+        ctx.fillStyle="white";
+        ctx.font="bold 24px Montserrat";
+        ctx.fillText("Счёт: "+score, 20, 45);
+        if(!gameRunning && score===0 && !frameId) {
+            ctx.fillStyle="black"; ctx.font="bold 24px Montserrat"; ctx.fillText("Нажми СТАРТ или ПРОБЕЛ", canvas.width/2-170, canvas.height/2);
+        }
+    }
+    function jump() { if(gameRunning) { bird.velocity = bird.jumpPower; } }
+    function endGame() {
+        gameRunning = false;
+        if(frameId) { cancelAnimationFrame(frameId); frameId = null; }
+        showToast(`Игра окончена! Счёт: ${score}. Начни заново!`);
+        draw();
+    }
+    function startGame() {
+        if(frameId) cancelAnimationFrame(frameId);
+        initGame();
+        gameRunning = true;
+        function gameLoop() {
+            if(!gameRunning) return;
+            updateGame();
+            draw();
+            frameId = requestAnimationFrame(gameLoop);
+        }
+        gameLoop();
+    }
+    document.getElementById('startFlappyBtn').addEventListener('click', () => { startGame(); });
+    window.addEventListener('keydown', (e) => { if(e.code === 'Space') { e.preventDefault(); if(!gameRunning) startGame(); else jump(); } });
+    canvas.addEventListener('click', () => { if(!gameRunning) startGame(); else jump(); });
+    draw();
+
+    // Магазин монет
+    const coinPacks = [{ coins: 250, label: "0.5$", bonus:250 }, { coins: 650, label:"1.2$", bonus:650 }, { coins:1500, label:"2.5$", bonus:1500 }, { coins:4000, label:"5$ VIP", bonus:4000 }];
+    const shopDiv = document.getElementById('shopSection');
+    coinPacks.forEach(p => {
+        const div = document.createElement('div'); div.className = 'coin-pack';
+        div.innerHTML = `<i class="fas fa-coins" style="font-size:3rem"></i><h3>${p.coins} монет</h3><p>${p.label}</p><button class="buyBtn" data-coins="${p.coins}">КУПИТЬ</button>`;
+        shopDiv.appendChild(div);
+    });
+    document.querySelectorAll('.buyBtn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            let coins = parseInt(btn.getAttribute('data-coins'));
+            modifyBalance(coins, `Депозит +${coins} монет! Спасибо за поддержку ⚽`);
+        });
+    });
+    let freeClaim=false;
+    document.getElementById('claimFreeBtn').addEventListener('click', () => {
+        if(!freeClaim) { modifyBalance(150, "Бесплатный депозит +150 монет!"); freeClaim=true; document.getElementById('claimFreeBtn').innerText="ПОЛУЧЕНО"; document.getElementById('claimFreeBtn').disabled=true; }
+        else showToast("Вы уже активировали бонус!");
+    });
+    updateBalanceUI();
+    showToast("Добро пожаловать! Открывай кейсы с крутящимися картами, получай бойцов и монеты!");
+</script>
+</body>
+</html>
